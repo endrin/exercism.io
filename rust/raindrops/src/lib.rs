@@ -1,17 +1,17 @@
+static DROPS: [(u32, &str); 3] =
+    [(3, "Pling"), (5, "Plang"), (7, "Plong")];
+
 pub fn raindrops(n: u32) -> String {
-    let mut sounds = String::new();
-
-    if n % 3 == 0 {
-        sounds.push_str("Pling")
-    }
-
-    if n % 5 == 0 {
-        sounds.push_str("Plang")
-    }
-
-    if n % 7 == 0 {
-        sounds.push_str("Plong")
-    }
+    let sounds = DROPS
+        .iter()
+        .filter_map(
+            |&(divisor, sound)| if n % divisor == 0 {
+                Some(sound)
+            } else {
+                None
+            },
+        )
+        .collect::<String>();
 
     if sounds.is_empty() {
         n.to_string()
