@@ -2,8 +2,8 @@ static DOUBLED: [usize; 10] =
     [0, 2, 4, 6, 8, 1, 3, 5, 7, 9];
 
 pub fn is_valid(input: &str) -> bool {
-    match cleaned(input) {
-        Some(digits) => {
+    cleaned(input)
+        .map(|digits| {
             let double_these =
                 [false, true].iter().cloned().cycle();
 
@@ -16,9 +16,8 @@ pub fn is_valid(input: &str) -> bool {
                     c
                 })
                 .sum::<usize>() % 10 == 0
-        }
-        None => false,
-    }
+        })
+        .unwrap_or(false)
 }
 
 fn cleaned(input: &str) -> Option<Vec<usize>> {
