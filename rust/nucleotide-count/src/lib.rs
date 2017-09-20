@@ -6,21 +6,20 @@ pub fn count(
     nuc: char,
     dna: &str,
 ) -> Result<usize, &'static str> {
-    validate_nucleo(nuc)?;
-    validate_dna(dna)?;
-    Ok(do_count(&nuc, dna))
+    validate_nucleo(nuc)
+        .and(validate_dna(dna))
+        .map(|_| do_count(&nuc, dna))
 }
 
 pub fn nucleotide_counts(
     dna: &str,
 ) -> Result<HashMap<char, usize>, &'static str> {
-    validate_dna(dna)?;
-    Ok(
+    validate_dna(dna).map(|_| {
         NUCLEOTIDS
             .iter()
-            .map(|n| (*n, do_count(n, dna)))
-            .collect(),
-    )
+            .map(|&nuc| (nuc, do_count(&nuc, dna)))
+            .collect()
+    })
 }
 
 fn validate_nucleo(nuc: char) -> Result<(), &'static str> {
