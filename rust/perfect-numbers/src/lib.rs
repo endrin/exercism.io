@@ -1,3 +1,5 @@
+use std::cmp::Ordering::*;
+
 #[derive(Debug, PartialEq)]
 pub enum Classification {
     Abundant,
@@ -15,11 +17,9 @@ pub fn classify(
     let sum_factors =
         (1..num / 2 + 1).filter(|f| num % f == 0).sum();
 
-    if num < sum_factors {
-        Ok(Classification::Abundant)
-    } else if num > sum_factors {
-        Ok(Classification::Deficient)
-    } else {
-        Ok(Classification::Perfect)
-    }
+    Ok(match num.cmp(&sum_factors) {
+        Less => Classification::Abundant,
+        Greater => Classification::Deficient,
+        Equal => Classification::Perfect,
+    })
 }
