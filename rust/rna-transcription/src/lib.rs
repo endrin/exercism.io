@@ -1,3 +1,5 @@
+use std::iter::FromIterator;
+
 #[derive(Debug, PartialEq)]
 pub struct RibonucleicAcid {
     strand: String,
@@ -6,37 +8,28 @@ pub struct RibonucleicAcid {
 #[derive(Debug)]
 pub struct DeoxyribonucleicAcid {
     strand: String,
-    valid: Result<(), &'static str>,
 }
 
 impl DeoxyribonucleicAcid {
     pub fn new(input: &str) -> Self {
-        let strand = String::from(input);
-        let valid =
-            if strand.chars().all(|c| "ACGT".contains(c)) {
-                Ok(())
-            } else {
-                Err("Given DNA is invalid")
-            };
-
-        DeoxyribonucleicAcid { strand, valid }
+        DeoxyribonucleicAcid {
+            strand: String::from(input),
+        }
     }
 
     pub fn to_rna(
         &self,
     ) -> Result<RibonucleicAcid, &'static str> {
-        self.valid?;
-        let complement = self.strand
+        self.strand
             .chars()
             .map(|c| match c {
-                'G' => 'C',
-                'C' => 'G',
-                'T' => 'A',
-                'A' => 'U',
-                _ => unreachable!(),
+                'G' => Ok('C'),
+                'C' => Ok('G'),
+                'T' => Ok('A'),
+                'A' => Ok('U'),
+                _ => Err("Given DNA is invalid"),
             })
-            .collect::<String>();
-        Ok(RibonucleicAcid::new(complement.as_str()))
+            .collect()
     }
 }
 
@@ -44,6 +37,17 @@ impl RibonucleicAcid {
     pub fn new(input: &str) -> Self {
         RibonucleicAcid {
             strand: String::from(input),
+        }
+    }
+}
+
+impl FromIterator<char> for RibonucleicAcid {
+    fn from_iter<I>(chars: I) -> Self
+    where
+        I: IntoIterator<Item = char>,
+    {
+        RibonucleicAcid {
+            strand: chars.into_iter().collect(),
         }
     }
 }
