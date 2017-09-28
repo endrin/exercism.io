@@ -16,7 +16,7 @@ impl School {
     pub fn add(&mut self, grade: u32, student: &str) {
         let students_list = self.students
             .entry(grade)
-            .or_insert(BTreeSet::new());
+            .or_insert_with(BTreeSet::new);
         students_list.insert(String::from(student));
     }
 
@@ -27,6 +27,7 @@ impl School {
     pub fn grade(&self, grade: u32) -> Option<Vec<String>> {
         self.students
             .get(&grade)
-            .map(|ppl| ppl.iter().cloned().collect())
+            .cloned()
+            .map(|ppl| ppl.into_iter().collect())
     }
 }
