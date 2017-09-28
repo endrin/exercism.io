@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 // quick and dirty way to ensure sort order
 use std::collections::BTreeSet;
+use std::iter::Iterator;
 
 pub struct School {
     students: BTreeMap<u32, BTreeSet<String>>,
@@ -28,6 +29,7 @@ impl School {
         self.students
             .get(&grade)
             .cloned()
-            .map(|ppl| ppl.into_iter().collect())
+            .map(BTreeSet::into_iter)
+            .map(Iterator::collect)
     }
 }
