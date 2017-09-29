@@ -17,14 +17,10 @@ impl Brackets {
         for br in brs.chars() {
             match br {
                 '[' | '{' | '(' => stack.push(br),
-                ']' | '}' | ')' => match stack.pop() {
-                    Some(open_br)
-                        if open_br
-                            == Brackets::pair(br) =>
-                    {
-                        continue
-                    }
-                    _ => return false,
+                ']' | '}' | ')' => if stack.pop()
+                    != Some(Brackets::pair(br))
+                {
+                    return false;
                 },
                 _ => unreachable!(),
             }
