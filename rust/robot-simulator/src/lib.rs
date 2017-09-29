@@ -67,9 +67,9 @@ impl Robot {
     }
 
     pub fn instructions(self, instructions: &str) -> Self {
-        instructions
-            .chars()
-            .fold(self, |robot, directive| match directive {
+        instructions.chars().fold(
+            self,
+            |robot, directive| match directive {
                 'L' => robot.turn_left(),
                 'R' => robot.turn_right(),
                 'A' => robot.advance(),
@@ -78,7 +78,8 @@ impl Robot {
                      'L', 'R', or 'A'. '{}' is not allowed",
                     c
                 ),
-            })
+            },
+        )
     }
 
     pub fn position(&self) -> (isize, isize) {
