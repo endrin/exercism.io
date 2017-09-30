@@ -1,29 +1,23 @@
 pub struct BowlingGame {
     frames: Vec<u32>,
+    bonus: Vec<u32>,
 }
 
 impl BowlingGame {
     pub fn new() -> Self {
         let frames = Vec::with_capacity(20);
-        BowlingGame { frames }
+        let bonus = Vec::with_capacity(4);
+        BowlingGame { frames, bonus }
     }
 
     pub fn roll(&mut self, roll: u32) -> Result<(), ()> {
         match roll {
-            0...10 if self.score().is_err() => {
-                if !self.frames.is_empty()
-                    && self.frames.len() % 2 == 0
-                    && self.frames
-                        .iter()
-                        .rev()
-                        .take(2)
-                        .sum::<u32>()
-                        == 10
-                {
-                    &self.frames.push(roll * 2);
-                } else {
-                    &self.frames.push(roll);
-                }
+            0...10 if self.frames.len() < 20 => {
+                &self.frames.push(roll);
+                Ok(())
+            }
+            0...10 if self.bonus.len() < 2 => {
+                &self.bonus.push(roll);
                 Ok(())
             }
             _ => Err(()),
@@ -34,42 +28,46 @@ impl BowlingGame {
         if self.frames.len() < 20 {
             Err(())
         } else {
-            Ok(BowlingGame::do_score(&self.frames))
+            Ok(BowlingGame::get_score(
+                &self.frames,
+                &self.bonus,
+            ))
         }
     }
 
-    fn do_score(frames: &Vec<u32>) -> u32 {
-        let mut deserves_double = false;
+    fn get_score(
+        frames: &Vec<u32>,
+        bonus: &Vec<u32>,
+    ) -> u32 {
         frames
             .chunks(2)
-            .map(|frame| if deserves_double {
-                deserves_double = frame.iter().sum::<u32>() == 10;
+            .fold(
+                (false, 0),
+                |(had_spare, total_score), frame| {
+                    let mut dyn_frame = frame.iter();
+                    let first_roll = dyn_frame.next().map(
+                        |scr| if had_spare {
+                            scr * 2
+                        } else {
+                            *scr
+                        },
+                    );
+                    let second_roll = dyn_frame.next();
 
-                let mut dyn_frame = frame.iter();
-                let first_roll =
-                    dyn_frame.next().map(|scr| scr * 2);
-                let second_roll = dyn_frame.next();
-                first_roll
-                    .and(second_roll)
-                    .map(|_| {
-                        first_roll.unwrap()
-                            + second_roll.unwrap()
-                    })
-                    .unwrap_or(first_roll.unwrap())
-            } else {
-                deserves_double = frame.iter().sum::<u32>() == 10;
+                    let frame_score = first_roll
+                        .and(second_roll)
+                        .map(|_| {
+                            first_roll.unwrap()
+                                + second_roll.unwrap()
+                        })
+                        .unwrap_or(first_roll.unwrap());
 
-                let mut dyn_frame = frame.iter();
-                let first_roll = dyn_frame.next();
-                let second_roll = dyn_frame.next();
-                first_roll
-                    .and(second_roll)
-                    .map(|_| {
-                        first_roll.unwrap()
-                            + second_roll.unwrap()
-                    })
-                    .unwrap_or(first_roll.unwrap().to_owned())
-            })
-            .sum()
+                    let had_spare =
+                        frame.iter().sum::<u32>() == 10;
+
+                    (had_spare, total_score + frame_score)
+                },
+            )
+            .1 + &bonus.iter().sum()
     }
 }
