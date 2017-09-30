@@ -1,13 +1,62 @@
+enum Roll {
+    NotPlayed,
+    Normal(u32),
+    Spare(u32),
+    Strike,
+}
+
+use Roll::*;
+
+impl Roll {
+    fn score(&self) -> u32 {
+        match *self {
+            NotPlayed => 0,
+            Normal(n) | Spare(n) => n,
+            Strike => 10,
+        }
+    }
+}
+
+enum GameState {
+    InProgress,
+    BonusRound,
+    Finished,
+}
+
+use GameState::*;
+
+type Frame = (Roll, Roll);
+
 pub struct BowlingGame {
-    frames: Vec<u32>,
-    bonus: Vec<u32>,
+    frames: Vec<Frame>,
+    bonus: Vec<Frame>,
+    current_frame: Frame,
+    state: GameState,
 }
 
 impl BowlingGame {
     pub fn new() -> Self {
-        let frames = Vec::with_capacity(20);
-        let bonus = Vec::with_capacity(4);
-        BowlingGame { frames, bonus }
+        let frames = Vec::with_capacity(10);
+        let bonus = Vec::with_capacity(2);
+        BowlingGame {
+            frames,
+            bonus,
+            current_frame: (NotPlayed, NotPlayed),
+            state: InProgress,
+        }
+    }
+
+    fn save(&mut self) {
+        match self.state {
+            InProgress => {
+                &self.frames.push(self.current_frame);
+            }
+            BonusRound => {
+                &self.bonus.push(self.current_frame);
+            }
+            Finished => unreachable!(),
+        }
+        self.current_frame = (NotPlayed, NotPlayed);
     }
 
     pub fn roll(&mut self, roll: u32) -> Result<(), ()> {
