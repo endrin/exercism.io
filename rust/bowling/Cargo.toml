@@ -1,3 +1,6 @@
 [package]
 name = "bowling"
 version = "1.0.0"
+
+[dependencies]
+itertools = "0.6.5"
