@@ -12,16 +12,6 @@ enum Frame {
 }
 
 impl Frame {
-    // fn into_score(&self) -> (u32, u32) {
-    //     match *self {
-    //         Frame::New => (0, 0),
-    //         Frame::Incomplete(r) => (r, 0),
-    //         Frame::Normal(first, second) |
-    //         Frame::Spare(first, second) => (first, second),
-    //         Frame::Strike => (10, 0),
-    //     }
-    // }
-
     fn sum(&self) -> u32 {
         match *self {
             Frame::New => 0,
