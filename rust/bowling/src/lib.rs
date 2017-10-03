@@ -12,15 +12,15 @@ enum Frame {
 }
 
 impl Frame {
-    fn into_score(&self) -> (u32, u32) {
-        match *self {
-            Frame::New => (0, 0),
-            Frame::Incomplete(r) => (r, 0),
-            Frame::Normal(first, second) |
-            Frame::Spare(first, second) => (first, second),
-            Frame::Strike => (10, 0),
-        }
-    }
+    // fn into_score(&self) -> (u32, u32) {
+    //     match *self {
+    //         Frame::New => (0, 0),
+    //         Frame::Incomplete(r) => (r, 0),
+    //         Frame::Normal(first, second) |
+    //         Frame::Spare(first, second) => (first, second),
+    //         Frame::Strike => (10, 0),
+    //     }
+    // }
 
     fn sum(&self) -> u32 {
         match *self {
@@ -31,11 +31,25 @@ impl Frame {
             Frame::Strike => 10,
         }
     }
+
+    fn rolls(&self) -> Box<Iterator<Item = u32>> {
+        match *self {
+            Frame::New => Box::new(iter::once(0)),
+            Frame::Incomplete(r) => Box::new(iter::once(r)),
+            Frame::Normal(first, second) |
+            Frame::Spare(first, second) => Box::new(
+                iter::once(first).chain(iter::once(second)),
+            ),
+            Frame::Strike => Box::new(iter::once(10)),
+        }
+    }
 }
 
+#[derive(PartialEq)]
 enum Game {
     InProgress,
-    BonusRound(u32),
+    BonusOneRoll,
+    BonusTwoRolls,
     Finished,
 }
 
@@ -59,10 +73,7 @@ impl BowlingGame {
     }
 
     fn finished(&self) -> bool {
-        match self.state {
-            Game::Finished => true,
-            _ => false,
-        }
+        self.state == Game::Finished
     }
 
     fn save(&mut self, f: Frame) {
@@ -72,22 +83,26 @@ impl BowlingGame {
                 if self.frames.len() == 10 {
                     match self.frames.last().unwrap() {
                         &Frame::Spare(_, _) => {
-                            self.state = Game::BonusRound(1)
+                            self.state = Game::BonusOneRoll
                         }
                         &Frame::Strike => {
-                            self.state = Game::BonusRound(2)
+                            self.state = Game::BonusTwoRolls
                         }
                         _ => self.state = Game::Finished,
                     }
                 }
             }
-            Game::BonusRound(n) => {
+            Game::BonusOneRoll => {
                 &self.bonus.push(f);
-                self.state = if n == 1 {
-                    Game::Finished
+                self.state = Game::Finished;
+            }
+            Game::BonusTwoRolls => {
+                self.state = if let Frame::Strike = f {
+                    Game::BonusOneRoll
                 } else {
-                    Game::BonusRound(1)
-                }
+                    Game::Finished
+                };
+                &self.bonus.push(f);
             }
             _ => unreachable!(),
         }
@@ -137,6 +152,11 @@ impl BowlingGame {
             Frame::Normal(_, _) |
             Frame::Spare(_, _) |
             Frame::Strike => self.save(frame_result),
+            Frame::Incomplete(_)
+                if self.state == Game::BonusOneRoll =>
+            {
+                self.save(frame_result)
+            }
             _ => self.keep(frame_result),
         }
 
@@ -148,58 +168,41 @@ impl BowlingGame {
             return Err("Game not finished");
         }
 
-        let game_score = iter::once(&Frame::New)
-            .chain(self.frames.iter())
+        let game_score = self.frames
+            .iter()
+            .chain([Frame::New, Frame::New].iter())
             .tuple_windows()
-            .fold(0, |score, (prev_frame, cur_frame)| {
-                let (fst, snd) = cur_frame.into_score();
+            .fold(0, |score, (current, next, after_next)| {
+                let rolls =
+                    next.rolls().chain(after_next.rolls());
 
-                let frame_score = match prev_frame {
-                    &Frame::Spare(_, _) => fst * 2 + snd,
-                    &Frame::Strike => fst * 2 + snd * 2,
-                    _ => fst + snd,
+                let frame_score = match current {
+                    &Frame::Strike => {
+                        10u32 + &rolls.take(2).sum()
+                    }
+                    &Frame::Spare(_, _) => {
+                        10u32 + &rolls.take(1).sum()
+                    }
+                    _ => current.sum(),
                 };
 
                 score + frame_score
             })
             + &self.bonus.iter().map(Frame::sum).sum();
 
-        Ok(game_score)
+        // Strike in the frame before last
+        // actually doubles bonus o_O
+        match self.frames.get(8).unwrap() {
+            &Frame::Strike => Ok(
+                game_score
+                    + self.bonus
+                        .get(0)
+                        .unwrap_or(&Frame::New)
+                        .rolls()
+                        .next()
+                        .unwrap(),
+            ),
+            _ => Ok(game_score),
+        }
     }
-
-    // fn get_score(
-    //     frames: &Vec<u32>,
-    //     bonus: &Vec<u32>,
-    // ) -> u32 {
-    //     frames
-    //         .chunks(2)
-    //         .fold(
-    //             (false, 0),
-    //             |(had_spare, total_score), frame| {
-    //                 let mut dyn_frame = frame.iter();
-    //                 let first_roll = dyn_frame.next().map(
-    //                     |scr| if had_spare {
-    //                         scr * 2
-    //                     } else {
-    //                         *scr
-    //                     },
-    //                 );
-    //                 let second_roll = dyn_frame.next();
-
-    //                 let frame_score = first_roll
-    //                     .and(second_roll)
-    //                     .map(|_| {
-    //                         first_roll.unwrap()
-    //                             + second_roll.unwrap()
-    //                     })
-    //                     .unwrap_or(first_roll.unwrap());
-
-    //                 let had_spare =
-    //                     frame.iter().sum::<u32>() == 10;
-
-    //                 (had_spare, total_score + frame_score)
-    //             },
-    //         )
-    //         .1 + &bonus.iter().sum()
-    // }
 }
