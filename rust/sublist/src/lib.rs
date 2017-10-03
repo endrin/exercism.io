@@ -6,15 +6,10 @@ pub enum Comparison {
     Unequal,
 }
 
-pub fn sublist<N, T, U>(xs: T, ys: U) -> Comparison
+pub fn sublist<T>(xs: &[T], ys: &[T]) -> Comparison
 where
-    N: Sized + PartialEq,
-    T: AsRef<[N]>,
-    U: AsRef<[N]>,
+    T: PartialEq,
 {
-    let xs = xs.as_ref();
-    let ys = ys.as_ref();
-
     if xs == ys {
         return Comparison::Equal;
     }
