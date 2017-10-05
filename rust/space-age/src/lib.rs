@@ -1,8 +1,8 @@
-pub struct Duration(u64);
+pub struct Duration(f64);
 
 impl From<u64> for Duration {
     fn from(s: u64) -> Self {
-        Duration(s)
+        Duration(s as f64)
     }
 }
 
@@ -11,7 +11,7 @@ pub trait Planet {
 
     fn years_during(d: &Duration) -> f64 {
         let &Duration(s) = d;
-        (s as f64) / Self::YEAR_DURATION
+        s / Self::YEAR_DURATION
     }
 }
 
