@@ -6,7 +6,6 @@ extern crate enum_derive;
 custom_derive! {
     #[derive(Copy, Clone, Debug, PartialEq,
         IterVariants(AllergenVariants))]
-    #[repr(u8)]
     pub enum Allergen {
         Eggs,
         Peanuts,
