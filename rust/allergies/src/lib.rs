@@ -1,17 +1,23 @@
-#[derive(Copy, Clone, Debug, PartialEq)]
-#[repr(u8)]
-pub enum Allergen {
-    Eggs,
-    Peanuts,
-    Shellfish,
-    Strawberries,
-    Tomatoes,
-    Chocolate,
-    Pollen,
-    Cats,
-}
+#[macro_use]
+extern crate custom_derive;
+#[macro_use]
+extern crate enum_derive;
 
-use Allergen::*;
+custom_derive! {
+    #[derive(Copy, Clone, Debug, PartialEq,
+        IterVariants(AllergenVariants))]
+    #[repr(u8)]
+    pub enum Allergen {
+        Eggs,
+        Peanuts,
+        Shellfish,
+        Strawberries,
+        Tomatoes,
+        Chocolate,
+        Pollen,
+        Cats,
+    }
+}
 
 pub struct Allergies {
     code: u8,
@@ -30,21 +36,8 @@ impl Allergies {
     }
 
     pub fn allergies(&self) -> Vec<Allergen> {
-        [
-            Eggs,
-            Peanuts,
-            Shellfish,
-            Strawberries,
-            Tomatoes,
-            Chocolate,
-            Pollen,
-            Cats,
-        ].into_iter()
-            .filter_map(|a| if self.is_allergic_to(a) {
-                Some(*a)
-            } else {
-                None
-            })
+        Allergen::iter_variants()
+            .filter(|a| self.is_allergic_to(a))
             .collect()
     }
 }
