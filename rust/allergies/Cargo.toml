@@ -1,0 +1,6 @@
+[package]
+name = "allergies"
+version = "1.0.0"
+
+[dependencies]
+lazy_static = "0.2.9"
