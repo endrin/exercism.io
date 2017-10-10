@@ -24,8 +24,8 @@ impl Iterator for Primes {
         for q in self.current.. {
             if let Some(p) = self.not_primes.remove(&q) {
                 let mut x = q.checked_add(p);
-                while x.is_some() &&
-                    self.not_primes
+                while x.is_some()
+                    && self.not_primes
                         .contains_key(&x.unwrap())
                 {
                     x = x.and_then(|x_| x_.checked_add(p));
