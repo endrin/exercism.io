@@ -1,18 +1,18 @@
 // Tried to implement infinite primes sequence
 // using Iterator and the Sieve of Eratosthenes
 
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
 pub struct Primes {
     current: usize,
-    not_primes: BTreeMap<usize, usize>,
+    not_primes: FnvHashMap<usize, usize>,
 }
 
 impl Primes {
     pub fn new() -> Primes {
         Primes {
             current: 2,
-            not_primes: BTreeMap::new(),
+            not_primes: FnvHashMap::default(),
         }
     }
 }
