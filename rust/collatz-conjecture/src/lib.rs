@@ -1,3 +1,6 @@
+extern crate boolinator;
+use boolinator::Boolinator;
+
 pub fn collatz(n: u64) -> Result<u64, &'static str> {
     if n == 0 {
         Err("Argument must be greater than 0")
@@ -21,11 +24,9 @@ impl Iterator for CollatzSteps {
         if self.0 == 1 {
             None
         } else {
-            if self.0 % 2 == 0 {
-                self.0 /= 2;
-            } else {
-                self.0 = self.0 * 3 + 1;
-            }
+            self.0 = (self.0 % 2 == 0)
+                .as_some(self.0 / 2)
+                .unwrap_or(self.0 * 3 + 1);
             Some(self.0)
         }
     }
