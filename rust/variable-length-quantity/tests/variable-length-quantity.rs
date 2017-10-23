@@ -192,7 +192,6 @@ fn overflow_u32() {
 }
 
 #[test]
-#[ignore]
 fn chained_execution_is_identity() {
     let test = &[
         0xf2,

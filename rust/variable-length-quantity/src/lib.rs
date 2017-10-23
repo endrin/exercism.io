@@ -1,3 +1,5 @@
+// TODO: try rewriting with nom
+
 #![feature(conservative_impl_trait)]
 
 use std::iter;
@@ -25,11 +27,6 @@ pub fn from_bytes(
             .position(|b| b & last_bit == 0)
         {
             None => return Err("incomplete byte sequence"),
-            Some(b) if b > 4 => {
-                println!("bytes are {:?}", bytes);
-                println!("bound is {:?}", b);
-                return Err("overflow u32");
-            }
             Some(b) => b,
         };
         let (value, rest) = bs.split_at(bound + 1);
@@ -66,26 +63,19 @@ fn encoded_iter<'a>(
         .chain(iter::once((value & seven_bits) as u8))
 }
 
+// Decode single value from its bytes
 fn decode(bytes: &[u8]) -> Result<u32, &'static str> {
     let seven_bits: u8 = 0b_0111_1111;
 
-    // if bytes.len() == 5
-    //     && bytes.iter().last().unwrap().leading_zeros() < 4
-    // {
-    //     return Err("overflow u32");
-    // }
+    let decoded = bytes
+        .iter()
+        .map(|b| b & seven_bits)
+        .map(u64::from)
+        .fold(0u64, |result, byte| (result << 7) | byte);
 
-    println!("bytes are {:?}", bytes);
-    println!(
-        "zeros at start are {:?}",
-        bytes.iter().last().unwrap().leading_zeros()
-    );
-
-
-    Ok(
-        bytes
-            .iter()
-            .map(|b| (b & seven_bits) as u32)
-            .fold(0u32, |result, byte| (result << 7) | byte),
-    )
+    if u64::from(decoded as u32) != decoded {
+        Err("overflow u32")
+    } else {
+        Ok(decoded as u32)
+    }
 }
