@@ -55,27 +55,24 @@ where
     }
 }
 
-macro_rules! impl_luhn_for_numbers {
-    ($($T:ty),+) => { $(
-        impl Luhn for $T {
-            fn clean(&self) -> Option<Vec<usize>> {
-                let mut input = (*self) as u64;
+impl<T> Luhn for T
+where
+    T: fmt::Display + Copy + Into<u64>,
+{
+    fn clean(&self) -> Option<Vec<usize>> {
+        let mut input = (*self).into();
 
-                let mut ds: Vec<usize> = vec![];
+        let mut ds: Vec<usize> = vec![];
 
-                while input > 0 {
-                    ds.push((input % 10u64) as usize);
-                    input /= 10;
-                }
-
-                if ds.len() >= 2 {
-                    Some(ds)
-                } else {
-                    None
-                }
-            }
+        while input > 0 {
+            ds.push((input % 10u64) as usize);
+            input /= 10;
         }
-    )+ }
-}
 
-impl_luhn_for_numbers!(u8, u16, u32, u64, usize);
+        if ds.len() >= 2 {
+            Some(ds)
+        } else {
+            None
+        }
+    }
+}
