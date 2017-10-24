@@ -21,8 +21,8 @@ impl Iterator for CollatzSteps {
     fn next(&mut self) -> Option<Self::Item> {
         (self.0 != 1).as_some_from(|| {
             self.0 = (self.0 % 2 == 0)
-                .as_some(self.0 / 2)
-                .unwrap_or(self.0 * 3 + 1);
+                .as_some_from(|| self.0 / 2)
+                .unwrap_or_else(|| self.0 * 3 + 1);
             self.0
         })
     }
