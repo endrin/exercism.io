@@ -1,3 +1,6 @@
 [package]
 name = "phone-number"
 version = "1.2.0"
+
+[dependencies]
+nom = "3.2.0"
