@@ -1,4 +1,5 @@
 use std::collections::BTreeSet;
+use std::iter::FromIterator;
 
 pub fn check(s: &str) -> bool {
     let s = s.chars()
@@ -6,5 +7,5 @@ pub fn check(s: &str) -> bool {
         .flat_map(|c| c.to_lowercase())
         .collect::<String>();
 
-    s.chars().collect::<BTreeSet<_>>().len() == s.len()
+    BTreeSet::from_iter(s.chars()).len() == s.len()
 }
