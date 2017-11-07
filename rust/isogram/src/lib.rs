@@ -1,11 +1,13 @@
-use std::collections::BTreeSet;
-use std::iter::FromIterator;
-
 pub fn check(s: &str) -> bool {
-    let s = s.chars()
+    let mut s_chars = s.chars()
         .filter(|c| c.is_alphabetic())
         .flat_map(|c| c.to_lowercase())
-        .collect::<String>();
+        .collect::<Vec<_>>();
+    s_chars.sort();
 
-    BTreeSet::from_iter(s.chars()).len() == s.len()
+    let total_chars = s_chars.len();
+    s_chars.dedup();
+    let unique_chars = s_chars.len();
+
+    unique_chars == total_chars
 }
