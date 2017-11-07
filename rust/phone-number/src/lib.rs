@@ -1,15 +1,10 @@
 #[macro_use]
 extern crate nom;
 
-use nom::IResult;
-
 use std::iter;
 
 pub fn number(s: &str) -> Option<String> {
-    match phone_number(s.trim().as_bytes()) {
-        IResult::Done(_, number) => Some(number),
-        _ => None,
-    }
+    phone_number(s.trim().as_bytes()).to_full_result().ok()
 }
 
 //
