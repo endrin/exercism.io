@@ -3,5 +3,4 @@ name = "allergies"
 version = "1.0.0"
 
 [dependencies]
-custom_derive = "0.1.7"
-enum_derive = "0.1.7"
+bitflags = "1.0.1"
