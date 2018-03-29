@@ -3,8 +3,8 @@ extern crate allergies;
 use allergies::*;
 
 fn compare_allergy_vectors(
-    expected: &Vec<Allergen>,
-    actual: &Vec<Allergen>,
+    expected: &[Allergen],
+    actual: &[Allergen],
 ) {
     for element in expected {
         if !actual.contains(element) {

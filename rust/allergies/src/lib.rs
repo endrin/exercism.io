@@ -29,7 +29,6 @@ impl Allergies {
 
     pub fn allergies(&self) -> Vec<Allergen> {
         (0..8)
-            .into_iter()
             .map(|bit| {
                 Allergen::from_bits_truncate(1 << bit)
             })
