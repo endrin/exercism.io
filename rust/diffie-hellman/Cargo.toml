@@ -1,0 +1,15 @@
+[package]
+edition = "2018"
+name = "diffie-hellman"
+version = "0.1.0"
+
+[features]
+big-primes = []
+default = ["big-primes"]
+
+[dev-dependencies]
+proptest = "0.10.1"
+
+[dependencies]
+rand = "0.8.3"
+rand_chacha = "0.3.0"

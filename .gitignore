@@ -1,2 +1,3 @@
 .cargo/
 .exercism/
+proptest-regressions/
